@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Color Picker Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        label, input, select {
+            display: block;
+            margin: 15px 0 10px;
+            width: 100%;
+            font-size: 1rem;
+        }
+        button {
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .message {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<h2>Choose a Color</h2>
+<form id="colorForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required />
+
+    <label for="surname">Surname:</label>
+    <input type="text" id="surname" required />
+
+    <label for="color">Choose Color:</label>
+    <select id="color" required>
+        <!-- Options added dynamically -->
+    </select>
+
+    <button type="submit">Submit</button>
+</form>
+
+<div class="message" id="message"></div>
+
+<script>
+    const form = document.getElementById("colorForm");
+    const messageEl = document.getElementById("message");
+    const colorSelect = document.getElementById("color");
+
+    // Replace with your Google Apps Script Web App URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyem0pxPj3vCfRzGUOfJggSyZOULtEWNbf1DfS4AmjK04tQIpAFsSWClx-s9tiRdYRSzA/exec";
+
+    const allColors = ["Red", "Blue", "Green", "Yellow", "Orange", "Purple", "Pink", "Black", "White"];
+
+    // Fetch used colors on page load
+    async function loadColors() {
+        try {
+            const res = await fetch(scriptURL, {
+                method: "POST",
+                mode: "cors",
+                body: JSON.stringify({ name, surname, color }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const usedColors = await res.json();
+            console.log(usedColors)
+
+            const availableColors = allColors.filter(color => !usedColors.includes(color));
+
+            if (availableColors.length === 0) {
+                colorSelect.innerHTML = "<option disabled>No colors available</option>";
+                colorSelect.disabled = true;
+                return;
+            }
+
+            availableColors.forEach(color => {
+                const option = document.createElement("option");
+                option.value = color;
+                option.textContent = color;
+                colorSelect.appendChild(option);
+            });
+        } catch (err) {
+            messageEl.textContent = "Error loading colors.";
+            console.error(err);
+        }
+    }
+
+
+    loadColors();
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("name").value.trim();
+        const surname = document.getElementById("surname").value.trim();
+        const color = colorSelect.value;
+
+        try {
+            const res = await fetch(scriptURL, {
+                method: "POST",
+                body: JSON.stringify({ name, surname, color }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const text = await res.text();
+            messageEl.textContent = text === "Success"
+                ? "Your color has been submitted!"
+                : "That color was already taken.";
+        } catch (err) {
+            messageEl.textContent = "Submission failed.";
+            console.error(err);
+        }
+    });
+</script>
+</body>
+</html>
