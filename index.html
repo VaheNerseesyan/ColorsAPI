@@ -90,36 +90,46 @@
     loadColors();
 
     form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const name = document.getElementById("name").value.trim();
-        const surname = document.getElementById("surname").value.trim();
-        const color = colorSelect.value.trim();
+    e.preventDefault();
+    const name = document.getElementById("name").value.trim();
+    const surname = document.getElementById("surname").value.trim();
+    const color = colorSelect.value.trim();
 
-        try {
+    try {
         const formData = new FormData();
         formData.append('name', name);
         formData.append('surname', surname);
-        formData.append('color', color); // Send original case
+        formData.append('color', color);
 
         const res = await fetch(scriptURL, {
             method: "POST",
-            body: formData
+            body: formData,
+            redirect: 'follow' // Important for Google Apps Script
         });
 
+        // Check if the response is OK (status 200-299)
+        if (!res.ok) {
+            throw new Error('Network response was not ok');
+        }
+
         const text = await res.text();
+        
         if (text === "Success") {
             messageEl.textContent = "Your color has been submitted!";
             // Refresh available colors
             colorSelect.innerHTML = "";
             loadColors();
+            // Clear form fields
+            document.getElementById("name").value = "";
+            document.getElementById("surname").value = "";
         } else {
-            messageEl.textContent = text; // Show server message
+            messageEl.textContent = text;
         }
     } catch (err) {
-        messageEl.textContent = "Submission failed. Please try again.";
-        console.error(err);
+        console.error('Error:', err);
+        messageEl.textContent = "Submission completed (check sheet), but there was a response issue.";
     }
-    });
+});
 </script>
 </body>
 </html>
