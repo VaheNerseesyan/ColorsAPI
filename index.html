@@ -60,32 +60,31 @@
 
     // Fetch used colors on page load
     async function loadColors() {
-    try {
-        const res = await fetch(scriptURL); // <-- GET request
-        const usedColors = await res.json();
+        try {
+            const res = await fetch(scriptURL);
+            const usedColors = await res.json();
 
-        console.log(usedColors);
+            console.log(usedColors);
 
-        const availableColors = allColors.filter(color => !usedColors.includes(color));
+            const availableColors = allColors.filter(color => !usedColors.includes(color));
 
-        if (availableColors.length === 0) {
-            colorSelect.innerHTML = "<option disabled>No colors available</option>";
-            colorSelect.disabled = true;
-            return;
+            if (availableColors.length === 0) {
+                colorSelect.innerHTML = "<option disabled>No colors available</option>";
+                colorSelect.disabled = true;
+                return;
+            }
+
+            availableColors.forEach(color => {
+                const option = document.createElement("option");
+                option.value = color;
+                option.textContent = color;
+                colorSelect.appendChild(option);
+            });
+        } catch (err) {
+            messageEl.textContent = "Error loading colors.";
+            console.error(err);
         }
-
-        availableColors.forEach(color => {
-            const option = document.createElement("option");
-            option.value = color;
-            option.textContent = color;
-            colorSelect.appendChild(option);
-        });
-    } catch (err) {
-        messageEl.textContent = "Error loading colors.";
-        console.error(err);
     }
-}
-
 
     loadColors();
 
@@ -96,21 +95,22 @@
         const color = colorSelect.value;
 
         try {
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('surname', surname);
+            formData.append('color', color);
+
             const res = await fetch(scriptURL, {
                 method: "POST",
-                mode: 'no-cors',
-                body: JSON.stringify({ name, surname, color }),
-                headers: {
-                    "Content-Type": "application/json"
-                }
+                body: formData
             });
 
             const text = await res.text();
             messageEl.textContent = text === "Success"
                 ? "Your color has been submitted!"
-                : "That color was already taken.";
+                : text;
         } catch (err) {
-            messageEl.textContent = "Submission failed.";
+            messageEl.textContent = "Submission failed. Please try again.";
             console.error(err);
         }
     });
