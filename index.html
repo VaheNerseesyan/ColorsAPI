@@ -98,7 +98,8 @@
         try {
             const res = await fetch(scriptURL, {
                 method: "POST",
-                body: JSON.stringify({ name, surname, color }),
+                mode: 'cors',
+                body: JSON.stringify({name, surname, color})
                 headers: {
                     "Content-Type": "application/json"
                 }
