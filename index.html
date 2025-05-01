@@ -90,30 +90,34 @@
     loadColors();
 
     form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const name = document.getElementById("name").value.trim();
-        const surname = document.getElementById("surname").value.trim();
-        const color = colorSelect.value;
+    e.preventDefault();
+    const name = document.getElementById("name").value.trim();
+    const surname = document.getElementById("surname").value.trim();
+    const color = colorSelect.value;
 
-        try {
-            const res = await fetch(scriptURL, {
-                method: "POST",
-                mode: 'cors',
-                body: JSON.stringify({name, surname, color})
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("surname", surname);
+    formData.append("color", color);
 
-            const text = await res.text();
-            messageEl.textContent = text === "Success"
-                ? "Your color has been submitted!"
-                : "That color was already taken.";
-        } catch (err) {
-            messageEl.textContent = "Submission failed.";
-            console.error(err);
-        }
-    });
+    try {
+        const res = await fetch(scriptURL, {
+            method: "POST",
+            body: formData,
+            headers: {
+    'Content-Type': 'application/json',
+  },
+        });
+
+        const text = await res.text();
+        messageEl.textContent = text === "Success"
+            ? "Your color has been submitted!"
+            : "That color was already taken.";
+    } catch (err) {
+        messageEl.textContent = "Submission failed.";
+        console.error(err);
+    }
+});
 </script>
 </body>
 </html>
