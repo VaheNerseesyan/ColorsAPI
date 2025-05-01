@@ -61,7 +61,7 @@
     // Fetch used colors on page load
     async function loadColors() {
         try {
-            const res = await fetch(scriptURL);
+            const res = await fetch(scriptURL); // <-- GET request
             const usedColors = await res.json();
 
             console.log(usedColors);
@@ -86,6 +86,7 @@
         }
     }
 
+
     loadColors();
 
     form.addEventListener("submit", async (e) => {
@@ -95,22 +96,21 @@
         const color = colorSelect.value;
 
         try {
-            const formData = new FormData();
-            formData.append('name', name);
-            formData.append('surname', surname);
-            formData.append('color', color);
-
             const res = await fetch(scriptURL, {
                 method: "POST",
-                body: formData
+                mode: 'no-cors',
+                body: JSON.stringify({ name, surname, color }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
             });
 
             const text = await res.text();
             messageEl.textContent = text === "Success"
                 ? "Your color has been submitted!"
-                : text;
+                : "That color was already taken.";
         } catch (err) {
-            messageEl.textContent = "Submission failed. Please try again.";
+            messageEl.textContent = "Submission failed.";
             console.error(err);
         }
     });
