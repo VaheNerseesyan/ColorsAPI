@@ -125,7 +125,10 @@
         } else {
             messageEl.textContent = text;
         }
-    } 
+    } catch (err) {
+        console.error('Error:', err);
+        console.error('Succes');
+    }
 });
 </script>
 </body>
