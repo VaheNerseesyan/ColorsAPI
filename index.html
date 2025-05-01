@@ -93,26 +93,32 @@
         e.preventDefault();
         const name = document.getElementById("name").value.trim();
         const surname = document.getElementById("surname").value.trim();
-        const color = colorSelect.value;
+        const color = colorSelect.value.trim();
 
         try {
-            const res = await fetch(scriptURL, {
-                method: "POST",
-                mode: 'no-cors',
-                body: JSON.stringify({ name, surname, color }),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('surname', surname);
+        formData.append('color', color); // Send original case
 
-            const text = await res.text();
-            messageEl.textContent = text === "Success"
-                ? "Your color has been submitted!"
-                : "That color was already taken.";
-        } catch (err) {
-            messageEl.textContent = "Submission failed.";
-            console.error(err);
+        const res = await fetch(scriptURL, {
+            method: "POST",
+            body: formData
+        });
+
+        const text = await res.text();
+        if (text === "Success") {
+            messageEl.textContent = "Your color has been submitted!";
+            // Refresh available colors
+            colorSelect.innerHTML = "";
+            loadColors();
+        } else {
+            messageEl.textContent = text; // Show server message
         }
+    } catch (err) {
+        messageEl.textContent = "Submission failed. Please try again.";
+        console.error(err);
+    }
     });
 </script>
 </body>
